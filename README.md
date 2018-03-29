@@ -1,2 +1,5 @@
-# Machine-Learning-Implementations
-The use of a perceptron, linear regression, and classification methods
+# Machine-Learning-Python
+The use of
+ Perceptron Learning Algorithm
+ Linear Regression
+ Classification Methods
