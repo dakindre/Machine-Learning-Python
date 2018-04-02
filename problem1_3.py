@@ -6,55 +6,43 @@ from sklearn.linear_model import Perceptron
 import matplotlib.pyplot as plt
 
 
+def PLA(value):
+    '''Perceptron with feature values and lables'''
+    clf = Perceptron(max_iter=100).fit(value.x, value.y)
 
-'''def plot(values):
-    plt.scatter(values.xi, values.xj, c=values.labels)
-    plt.show()'''
+    '''Attributes from Perceptron'''
+    w_1 = clf.coef_[:, 0].astype(int)[0]
+    w_2 = clf.coef_[:, 1].astype(int)[0]
+    b = clf.intercept_.astype(int)[0]
 
-
-def PLA(X, Y):
-    h = .02
-    clf = Perceptron(max_iter=100).fit(X, Y)
-    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
-    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
-                         np.arange(y_min, y_max, h))
-
+    '''Output Perceptron attributes to csv file'''
+    print(w_1, w_2, b)
+    value.generateOutput(w_1, w_2, b)
     
-    # Plot the decision boundary. For that, we will assign a color to each
-    # point in the mesh [x_min, m_max]x[y_min, y_max].
-    fig, ax = plt.subplots()
-    Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
-
-    # Put the result into a color plot
-    Z = Z.reshape(xx.shape)
-    ax.contourf(xx, yy, Z, cmap=plt.cm.Paired)
-    ax.axis('off')
-
-    # Plot also the training points
-    ax.scatter(X[:, 0], X[:, 1], c=Y, cmap=plt.cm.Paired)
-
-    ax.set_title('Perceptron')
-    fig.show()
     
     
 class inOut:
     def __init__(self, inStr, outStr):
         self.inStr = inStr
         self.outStr = outStr
-        self.xi = np.array([[2,1],[3,4],[4,2],[3,1]])
-        self.labels = np.array([0,0,1,1])
+        self.x = np.array([[8,-1],[7,7],[12,-20],[14,-3],[12,8],[1,-12],[15,5],[7,-10],[10,4],[6,2],[8,12],[2,20],[1,-12],[9,8],[3,3],[5,6],[1,11]])
+        self.y = np.array([1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1, -1, 1, -1, 1, 1, 1])
         self.generateInput()
 
     def generateInput(self):
-        print('xi ', self.xi,' labels ', self.labels)
-        with open(self.inStr) as csvfile:
+        with open(self.inStr,) as csvfile:
             inputCSV = csv.reader(csvfile, delimiter=',')
             for row in inputCSV:
                 None
                 
-    def generateOutput(self):
-        return None
+    def generateOutput(self, w_1, w_2, b):
+        rowString = [w_1, w_2, b]
+        print (rowString)
+        '''with open(self.outStr, 'a') as csvFile:
+            fileWriter = csv.writer(csvFile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            #fileWriter.writerow(w_1, w_2, b)'''
+    
+        
 
                  
 def main():
@@ -64,9 +52,9 @@ def main():
 
     args = parser.parse_args()
 
-    values = inOut(args.i, args.o)
+    value = inOut(args.i, args.o)
 
-    PLA(values.xi, values.labels)
+    PLA(value)
 
 
     
