@@ -3,21 +3,13 @@ import argparse
 import csv
 import numpy as np
 from sklearn.linear_model import Perceptron
+import matplotlib.pyplot as plt
 
 
-def PLA(value):
-    '''Perceptron with feature values and lables'''
-    clf = Perceptron(n_iter=100).fit(value.x, value.y)
+def LR(value):
+    print(None)
     
-
-    '''Attributes from Perceptron'''
-    w_1 = clf.coef_[:, 0].astype(int)[0]
-    w_2 = clf.coef_[:, 1].astype(int)[0]
-    b = clf.intercept_.astype(int)[0]
-
-    '''Output Perceptron attributes to csv file'''
-    wL = [w_1,w_2,b]
-    value.generateOutput(wL)
+    
     
     
     
@@ -25,24 +17,25 @@ class inOut:
     def __init__(self, inStr, outStr):
         self.inStr = inStr
         self.outStr = outStr
-        self.x = np.empty((0,2), int)
-        self.y = np.empty((0,1), int)
+        self.x = np.empty((0,3), int)
+        #self.y = np.empty([])
+        self.B = np.zeros(4)
         self.generateInput()
 
     def generateInput(self):
-        tempList = []
         with open(self.inStr) as csvfile:
             inputCSV = csv.reader(csvfile, delimiter=',')
             for row in inputCSV:
-                self.x = np.append(self.x, np.array([[row[0], row[1]]]), axis=0)
-                tempList.append(int(row[2]))
-            self.y = np.asarray(tempList)
+                self.x = np.append(self.x, np.array([[row[0], row[1], row[2]]]), axis=0)
+            print (self.x)
                 
-    def generateOutput(self, wL):
+    def generateOutput(self, output):
         with open(self.outStr, 'a') as csvFile:
             fileWriter = csv.writer(csvFile, lineterminator='\n')
-            fileWriter.writerow(wL)
-            
+            fileWriter.writerow(output)
+    
+        
+
                  
 def main():
     parser = argparse.ArgumentParser()
@@ -53,9 +46,10 @@ def main():
 
     value = inOut(args.i, args.o)
 
-    PLA(value)
+    LR(value)
 
 
     
+
 if __name__ == "__main__":
 	main()
