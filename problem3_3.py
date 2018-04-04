@@ -2,7 +2,13 @@ import sys
 import argparse
 import csv
 import numpy as np
-from sklearn import svm
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
 
 
@@ -48,47 +54,59 @@ def plot_contours(ax, clf, xx, yy, **params):
 
 
 def SVM(value):
-    print (value.x, value.y)
-    # we create an instance of SVM and fit out data. We do not scale our
-    # data since we want to plot the support vectors
-    C = 1.0  # SVM regularization parameter
-    models = (svm.SVC(kernel='linear', C=C),
-              svm.LinearSVC(C=C),
-              svm.SVC(kernel='rbf', gamma=0.7, C=C),
-              svm.SVC(kernel='poly', degree=3, C=C))
-    models = (clf.fit(value.x, value.y) for clf in models)
-
-    # title for the plots
-    titles = ('SVC with linear kernel',
-              'LinearSVC (linear kernel)',
-              'SVC with RBF kernel',
-              'SVC with polynomial (degree 3) kernel')
-
-    # Set-up 2x2 grid for plotting.
-    fig, sub = plt.subplots(2, 2)
-    plt.subplots_adjust(wspace=0.4, hspace=0.4)
-
-    X0, X1 = value.x[:, 0], value.x[:, 1]
-    xx, yy = make_meshgrid(X0, X1)
-
-    for clf, title, ax in zip(models, titles, sub.flatten()):
-        plot_contours(ax, clf, xx, yy,
-                      cmap=plt.cm.coolwarm, alpha=0.8)
-        ax.scatter(X0, X1, c=value.y, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
-        ax.set_xlim(xx.min(), xx.max())
-        ax.set_ylim(yy.min(), yy.max())
-        ax.set_xlabel('A')
-        ax.set_ylabel('B')
-        ax.set_xticks(())
-        ax.set_yticks(())
-        ax.set_title(title)
-
-    plt.show()
     
-    
+    #Create Training and Test 60/40 stratified
+    X_train, X_test, Y_train, Y_test = train_test_split(value.x, value.y, test_size=0.4, stratify=value.y)
 
+    #Set param for SVM Linear and run fit method to find model using training data
+    svmlp = {'kernel': ['linear'], 'C': [0.1, 0.5, 1, 5, 10, 50, 100]}
+    SVML = GridSearchCV(SVC(), svmlp, cv=5, refit=True)
+    SVML.fit(X_train, Y_train)
+    testScoreSMLP = SVML.score(X_test, Y_test)
+    print('svm_linear ', 'best_training_score: ', SVML.best_score_, 'actual_test_score: ', testScoreSMLP)
     
-    
+    #Set param for SVM Polynomial and run fit method to find model using training data
+    svmpp = {'kernel': ['poly'], 'C': [0.1, 1, 3], 'degree': [4, 5, 6], 'gamma': [0.1, 0.5]}
+    SVMP = GridSearchCV(SVC(), svmpp, cv=5, refit=True)
+    SVMP.fit(X_train, Y_train)
+    testScoreSMP = SVMP.score(X_test, Y_test)
+    print('svm_poly ', 'best_training_score: ', SVMP.best_score_, 'actual_test_score: ', testScoreSMP)
+
+    #Set param for SVM RBF and run fit method to find model using training data
+    svmrp = {'kernel': ['rbf'], 'C': [0.1, 0.5, 1, 5, 10, 50, 100], 'gamma': [0.1, 0.5, 1, 3, 6, 10]}
+    SVMRBF = GridSearchCV(SVC(), svmrp, cv=5, refit=True)
+    SVMRBF.fit(X_train, Y_train)
+    testScoreSMRBF = SVMRBF.score(X_test, Y_test)
+    print('svm_rbf ', 'best_training_score: ', SVMRBF.best_score_, 'actual_test_score: ', testScoreSMRBF)
+
+    #Set param for Logistic Regression and run fit method to find model using training data
+    inputparam = {'C': [0.1, 0.5, 1, 5, 10, 50, 100]}
+    LR = GridSearchCV(LogisticRegression(), inputparam, cv=5, refit=True)
+    LR.fit(X_train, Y_train)
+    testScoreLR = LR.score(X_test, Y_test)
+    print('logistic_regression ', 'best_training_score: ', LR.best_score_, 'actual_test_score: ', testScoreLR)
+
+    #Set param for K nearest neighbors and run fit method to find model using training data
+    inputparam = {'n_neighbors': list(range(1, 50)), 'leaf_size': [5,10,15,20,25,30,35,40,45,50,55,60]}
+    KNN = GridSearchCV(KNeighborsClassifier(), inputparam, cv=5, refit=True)
+    KNN.fit(X_train, Y_train)
+    testScoreKNN = KNN.score(X_test, Y_test)
+    print('k-nearest_neighbors ', 'best_training_score: ', KNN.best_score_, 'actual_test_score: ', testScoreKNN)
+
+    #Set param for Decision Tree Classification and run fit method to find model using training data
+    inputparam = {'max_depth': list(range(1, 50)), 'min_samples_split': [2,3,4,5,6,7,8,9,10]}
+    DT = GridSearchCV(DecisionTreeClassifier(), inputparam, cv=5, refit=True)
+    DT.fit(X_train, Y_train)
+    testScoreDT = DT.score(X_test, Y_test)
+    print('decision_tree_class ', 'best_training_score: ', DT.best_score_, 'actual_test_score: ', testScoreDT)
+
+    #Set param for Random Forest Classification and run fit method to find model using training data
+    inputparam = {'max_depth': list(range(1, 50)), 'min_samples_split': [2,3,4,5,6,7,8,9,10]}
+    DT = GridSearchCV(RandomForestClassifier(), inputparam, cv=5, refit=True)
+    DT.fit(X_train, Y_train)
+    testScoreDT = DT.score(X_test, Y_test)
+    print('random_forest_class ', 'best_training_score: ', DT.best_score_, 'actual_test_score: ', testScoreDT)
+
     
 class inOut:
     def __init__(self, inStr, outStr):
